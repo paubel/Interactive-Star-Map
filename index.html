@@ -2,16 +2,25 @@
 <html lang="en">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JN4FV1G82G"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-JN4FV1G82G');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Star Map</title>
+    <title>Star Map Filter</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div id="app">
         <header>
-            <h1>Interactive Star Map</h1>
+            <h1>Star Map Filter</h1>
 
             <!-- Location Controls -->
             <div class="control-section">
@@ -131,7 +140,8 @@
         <button class="button close-button" id="close-modal">×</button>
 
         <div class="modal-content">
-            <h2>About Interactive Star Map</h2>
+            <h1>Star Map Filter</h1>
+            <h2>An Interactive Star Map</h2>
             <p>This project is an interactive star map that allows users to explore various properties of stars such as
                 brightness (magnitude), distance, age, and mass. Users can click on individual stars to see detailed
                 information and can also filter stars using the range sliders. The visualization provides an educational
