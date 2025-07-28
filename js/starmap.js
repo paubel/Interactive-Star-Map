@@ -20,6 +20,14 @@ class StarMap {
     this.horizonRadius =
       Math.min(this.canvas.width, this.canvas.height) / 2 - 30;
 
+    // ZOOM PROPERTIES - NYTT
+    this.zoomLevel = 1;
+    this.minZoom = 0.5;
+    this.maxZoom = 3;
+    this.panX = 0;
+    this.panY = 0;
+    this.lastTouchDistance = 0;
+
     this.setupEventListeners();
     this.render();
   }
@@ -52,6 +60,7 @@ class StarMap {
     );
   }
 
+  // UPPDATERAD MED ZOOM
   celestialToCanvas(ra, dec) {
     const now = new Date();
     const lst = this.getLocalSiderealTime(now);
@@ -61,14 +70,14 @@ class StarMap {
 
     let radius;
     if (altitude >= 0) {
-      radius = this.horizonRadius * (1 - altitude / 90);
+      radius = this.horizonRadius * (1 - altitude / 90) * this.zoomLevel;
     } else {
-      radius = this.horizonRadius * (1 - altitude / 90);
+      radius = this.horizonRadius * (1 - altitude / 90) * this.zoomLevel;
     }
 
     const angle = azimuthRad - Math.PI / 2;
-    const x = this.centerX + radius * Math.cos(angle);
-    const y = this.centerY + radius * Math.sin(angle);
+    const x = this.centerX + radius * Math.cos(angle) + this.panX;
+    const y = this.centerY + radius * Math.sin(angle) + this.panY;
 
     return { x, y, altitude };
   }
@@ -145,6 +154,9 @@ class StarMap {
       }
     }
 
+    // UPPDATERA ZOOM INFO
+    this.updateZoomInfo();
+
     const event = new CustomEvent("starsFiltered", {
       detail: { count: visibleStars.length, total: this.stars.length },
     });
@@ -158,7 +170,7 @@ class StarMap {
       0,
       this.centerX,
       this.centerY,
-      this.horizonRadius
+      this.horizonRadius * this.zoomLevel
     );
     gradient.addColorStop(0, "#001133");
     gradient.addColorStop(0.7, "#000822");
@@ -173,9 +185,9 @@ class StarMap {
     this.ctx.lineWidth = 2;
     this.ctx.beginPath();
     this.ctx.arc(
-      this.centerX,
-      this.centerY,
-      this.horizonRadius,
+      this.centerX + this.panX,
+      this.centerY + this.panY,
+      this.horizonRadius * this.zoomLevel,
       0,
       2 * Math.PI
     );
@@ -186,40 +198,64 @@ class StarMap {
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
 
-    const compassOffset = 20;
+    const compassOffset = 20 * this.zoomLevel;
 
     this.ctx.fillText(
       "N",
-      this.centerX,
-      this.centerY - this.horizonRadius - compassOffset
+      this.centerX + this.panX,
+      this.centerY +
+        this.panY -
+        this.horizonRadius * this.zoomLevel -
+        compassOffset
     );
     this.ctx.fillText(
       "S",
-      this.centerX,
-      this.centerY + this.horizonRadius + compassOffset
+      this.centerX + this.panX,
+      this.centerY +
+        this.panY +
+        this.horizonRadius * this.zoomLevel +
+        compassOffset
     );
     this.ctx.fillText(
       "E",
-      this.centerX + this.horizonRadius + compassOffset,
-      this.centerY
+      this.centerX +
+        this.panX +
+        this.horizonRadius * this.zoomLevel +
+        compassOffset,
+      this.centerY + this.panY
     );
     this.ctx.fillText(
       "W",
-      this.centerX - this.horizonRadius - compassOffset,
-      this.centerY
+      this.centerX +
+        this.panX -
+        this.horizonRadius * this.zoomLevel -
+        compassOffset,
+      this.centerY + this.panY
     );
 
     this.ctx.strokeStyle = "#666666";
     this.ctx.lineWidth = 1;
 
     this.ctx.beginPath();
-    this.ctx.moveTo(this.centerX, this.centerY - this.horizonRadius);
-    this.ctx.lineTo(this.centerX, this.centerY + this.horizonRadius);
+    this.ctx.moveTo(
+      this.centerX + this.panX,
+      this.centerY + this.panY - this.horizonRadius * this.zoomLevel
+    );
+    this.ctx.lineTo(
+      this.centerX + this.panX,
+      this.centerY + this.panY + this.horizonRadius * this.zoomLevel
+    );
     this.ctx.stroke();
 
     this.ctx.beginPath();
-    this.ctx.moveTo(this.centerX - this.horizonRadius, this.centerY);
-    this.ctx.lineTo(this.centerX + this.horizonRadius, this.centerY);
+    this.ctx.moveTo(
+      this.centerX + this.panX - this.horizonRadius * this.zoomLevel,
+      this.centerY + this.panY
+    );
+    this.ctx.lineTo(
+      this.centerX + this.panX + this.horizonRadius * this.zoomLevel,
+      this.centerY + this.panY
+    );
     this.ctx.stroke();
 
     this.ctx.strokeStyle = "#333333";
@@ -227,9 +263,9 @@ class StarMap {
 
     this.ctx.beginPath();
     this.ctx.arc(
-      this.centerX,
-      this.centerY,
-      this.horizonRadius * 0.33,
+      this.centerX + this.panX,
+      this.centerY + this.panY,
+      this.horizonRadius * this.zoomLevel * 0.33,
       0,
       2 * Math.PI
     );
@@ -237,9 +273,9 @@ class StarMap {
 
     this.ctx.beginPath();
     this.ctx.arc(
-      this.centerX,
-      this.centerY,
-      this.horizonRadius * 0.67,
+      this.centerX + this.panX,
+      this.centerY + this.panY,
+      this.horizonRadius * this.zoomLevel * 0.67,
       0,
       2 * Math.PI
     );
@@ -250,9 +286,9 @@ class StarMap {
     this.ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
     for (let i = 0; i < 200; i++) {
       const angle = Math.random() * 2 * Math.PI;
-      const radius = Math.random() * this.horizonRadius;
-      const x = this.centerX + radius * Math.cos(angle);
-      const y = this.centerY + radius * Math.sin(angle);
+      const radius = Math.random() * this.horizonRadius * this.zoomLevel;
+      const x = this.centerX + this.panX + radius * Math.cos(angle);
+      const y = this.centerY + this.panY + radius * Math.sin(angle);
       const size = Math.random() * 0.5 + 0.2;
 
       this.ctx.beginPath();
@@ -262,7 +298,7 @@ class StarMap {
   }
 
   drawStar(star, x, y, alpha = 1.0) {
-    const size = this.getStarSize(star.magnitude);
+    const size = this.getStarSize(star.magnitude) * this.zoomLevel;
 
     let color = "#ffffff";
     if (star.spectralClass.startsWith("M")) color = "#ffaa77";
@@ -301,8 +337,8 @@ class StarMap {
     // Förbättrad text-rendering
     this.ctx.save();
 
-    const fontSize = window.innerWidth <= 768 ? "12px" : "10px";
-    this.ctx.font = `${fontSize} Arial`;
+    const fontSize = (window.innerWidth <= 768 ? 12 : 10) * this.zoomLevel;
+    this.ctx.font = `${fontSize}px Arial`;
     this.ctx.textAlign = "left";
     this.ctx.textBaseline = "middle";
 
@@ -327,74 +363,184 @@ class StarMap {
     this.ctx.strokeStyle = "#ffd700";
     this.ctx.lineWidth = 3;
     this.ctx.beginPath();
-    this.ctx.arc(x, y, 25, 0, 2 * Math.PI);
+    this.ctx.arc(x, y, 25 * this.zoomLevel, 0, 2 * Math.PI);
     this.ctx.stroke();
 
     this.ctx.strokeStyle = "rgba(255, 215, 0, 0.5)";
     this.ctx.lineWidth = 1;
     this.ctx.beginPath();
-    this.ctx.arc(x, y, 35, 0, 2 * Math.PI);
+    this.ctx.arc(x, y, 35 * this.zoomLevel, 0, 2 * Math.PI);
     this.ctx.stroke();
   }
 
+  // UPPDATERAD MED ZOOM OCH TOUCH EVENTS
+  // Ersätt setupEventListeners metoden med denna:
+
   setupEventListeners() {
-    // Desktop click
-    this.canvas.addEventListener("click", (e) => {
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // Desktop click & drag
+    this.canvas.addEventListener("mousedown", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
-      this.handleStarSelection(clickX, clickY);
+
+      // Check if clicking on a star first
+      if (!this.handleStarSelection(clickX, clickY)) {
+        // No star clicked, start dragging
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+        this.canvas.style.cursor = "grabbing";
+      }
     });
 
-    // Touch events
+    this.canvas.addEventListener("mousemove", (e) => {
+      if (isDragging) {
+        const deltaX = e.clientX - lastX;
+        const deltaY = e.clientY - lastY;
+
+        this.panX += deltaX;
+        this.panY += deltaY;
+
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        this.render();
+      } else if (window.innerWidth > 768) {
+        // Mouse hover för desktop
+        const rect = this.canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        let overStar = false;
+        const visibleStars = this.getVisibleStars();
+
+        for (let star of visibleStars) {
+          if (star.canvasX && star.canvasY) {
+            const distance = Math.sqrt(
+              Math.pow(mouseX - star.canvasX, 2) +
+                Math.pow(mouseY - star.canvasY, 2)
+            );
+
+            if (distance <= star.radius) {
+              overStar = true;
+              break;
+            }
+          }
+        }
+
+        this.canvas.style.cursor = overStar ? "pointer" : "grab";
+      }
+    });
+
+    this.canvas.addEventListener("mouseup", () => {
+      isDragging = false;
+      this.canvas.style.cursor = "grab";
+    });
+
+    this.canvas.addEventListener("mouseleave", () => {
+      isDragging = false;
+      this.canvas.style.cursor = "grab";
+    });
+
+    // Touch events för mobil
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isPanningTouch = false;
+
     this.canvas.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      const rect = this.canvas.getBoundingClientRect();
       const touch = e.touches[0];
-      const touchX = touch.clientX - rect.left;
-      const touchY = touch.clientY - rect.top;
-      this.handleStarSelection(touchX, touchY);
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+      touchStartTime = Date.now();
+
+      if (e.touches.length === 1) {
+        // Single touch - kan vara star selection eller pan start
+        e.preventDefault();
+      } else if (e.touches.length === 2) {
+        // Pinch zoom
+        this.lastTouchDistance = this.getTouchDistance(e.touches);
+        e.preventDefault();
+      }
+    });
+
+    this.canvas.addEventListener("touchmove", (e) => {
+      if (e.touches.length === 1) {
+        // Single touch pan
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+
+        // Om användaren har rört sig mer än 10px, börja panning
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+          isPanningTouch = true;
+
+          this.panX += deltaX;
+          this.panY += deltaY;
+
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+
+          this.render();
+        }
+        e.preventDefault();
+      } else if (e.touches.length === 2) {
+        // Pinch zoom
+        const currentDistance = this.getTouchDistance(e.touches);
+        const zoomFactor = currentDistance / this.lastTouchDistance;
+
+        this.zoomLevel *= zoomFactor;
+        this.zoomLevel = Math.max(
+          this.minZoom,
+          Math.min(this.maxZoom, this.zoomLevel)
+        );
+
+        this.lastTouchDistance = currentDistance;
+        this.render();
+        e.preventDefault();
+      }
     });
 
     this.canvas.addEventListener("touchend", (e) => {
       e.preventDefault();
-    });
 
-    // Mouse hover (desktop only)
-    this.canvas.addEventListener("mousemove", (e) => {
-      if (window.innerWidth <= 768) return;
-
-      const rect = this.canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      let overStar = false;
-      const visibleStars = this.getVisibleStars();
-
-      for (let star of visibleStars) {
-        if (star.canvasX && star.canvasY) {
-          const distance = Math.sqrt(
-            Math.pow(mouseX - star.canvasX, 2) +
-              Math.pow(mouseY - star.canvasY, 2)
-          );
-
-          if (distance <= star.radius) {
-            overStar = true;
-            break;
-          }
-        }
+      // Om det var en kort touch utan panning, försök välja stjärna
+      if (!isPanningTouch && Date.now() - touchStartTime < 200) {
+        const rect = this.canvas.getBoundingClientRect();
+        const touchX = touchStartX - rect.left;
+        const touchY = touchStartY - rect.top;
+        this.handleStarSelection(touchX, touchY);
       }
 
-      this.canvas.style.cursor = overStar ? "pointer" : "crosshair";
+      isPanningTouch = false;
+    });
+
+    // Mouse wheel zoom
+    this.canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+      this.zoomLevel *= zoomFactor;
+      this.zoomLevel = Math.max(
+        this.minZoom,
+        Math.min(this.maxZoom, this.zoomLevel)
+      );
+      this.render();
     });
   }
+
+  // Ersätt handleStarSelection metoden:
 
   handleStarSelection(x, y) {
     const distFromCenter = Math.sqrt(
       Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2)
     );
 
-    if (distFromCenter > this.horizonRadius * 1.5) return;
+    if (distFromCenter > this.horizonRadius * this.zoomLevel * 1.5)
+      return false;
 
     const visibleStars = this.getVisibleStars();
 
@@ -409,10 +555,12 @@ class StarMap {
 
         if (distance <= hitRadius) {
           this.selectStar(star);
-          return;
+          return true; // Stjärna vald
         }
       }
     }
+
+    return false; // Ingen stjärna vald
   }
 
   selectStar(star) {
@@ -421,5 +569,37 @@ class StarMap {
 
     const event = new CustomEvent("starSelected", { detail: star });
     document.dispatchEvent(event);
+  }
+
+  // NYA ZOOM METODER
+  getTouchDistance(touches) {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  zoomIn() {
+    this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel * 1.2);
+    this.render();
+  }
+
+  zoomOut() {
+    this.zoomLevel = Math.max(this.minZoom, this.zoomLevel / 1.2);
+    this.render();
+  }
+
+  resetZoom() {
+    this.zoomLevel = 1;
+    this.panX = 0;
+    this.panY = 0;
+    this.render();
+  }
+
+  updateZoomInfo() {
+    const zoomElement = document.getElementById("zoom-info");
+    if (zoomElement) {
+      const zoomPercent = Math.round(this.zoomLevel * 100);
+      zoomElement.textContent = `Zoom: ${zoomPercent}%`;
+    }
   }
 }

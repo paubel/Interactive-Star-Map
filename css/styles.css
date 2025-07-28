@@ -316,17 +316,23 @@ main {
   padding: 20px 20px 10px 20px;
 }
 
+/* Lägg till i styles.css: */
+
 #starmap {
   border: 2px solid #333;
   border-radius: 10px;
   background: radial-gradient(circle, #001122, #000000);
-  cursor: crosshair;
+  cursor: grab; /* Ändra från crosshair till grab */
   box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
 
   /* Touch-optimering */
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+#starmap:active {
+  cursor: grabbing;
 }
 
 #star-info {
@@ -565,4 +571,62 @@ main {
 
 .dual-slider-values {
   justify-content: center;
+}
+
+/* ZOOM CONTROLS - LÄGG TILL I SLUTET AV FILEN */
+
+.zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 100;
+}
+
+.zoom-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(74, 144, 226, 0.8);
+  border: 1px solid #4a90e2;
+  border-radius: 6px;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.zoom-button:hover {
+  background: rgba(53, 122, 189, 0.9);
+  transform: scale(1.1);
+}
+
+.zoom-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #4a90e2;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  z-index: 100;
+}
+
+@media (max-width: 768px) {
+  .zoom-controls {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .zoom-info {
+    bottom: 10px;
+    left: 10px;
+    font-size: 0.8rem;
+  }
 }

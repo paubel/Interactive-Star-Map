@@ -66,6 +66,19 @@ class StarMapApp {
     document.getElementById("close-info").addEventListener("click", () => {
       this.hideStarInfo();
     });
+
+    // ZOOM CONTROLS - LÄGG TILL DESSA
+    document.getElementById("zoom-in").addEventListener("click", () => {
+      this.starMap.zoomIn();
+    });
+
+    document.getElementById("zoom-out").addEventListener("click", () => {
+      this.starMap.zoomOut();
+    });
+
+    document.getElementById("zoom-reset").addEventListener("click", () => {
+      this.starMap.resetZoom();
+    });
   }
 
   setupDualSliders() {
