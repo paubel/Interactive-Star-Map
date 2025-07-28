@@ -12,22 +12,37 @@ body {
 }
 
 header {
-  padding: 20px;
+  padding: 15px;
   background: rgba(0, 0, 0, 0.8);
   border-bottom: 2px solid #333;
 }
 
-h1 {
+.header-title {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+}
+
+.header-title h1 {
+  margin-bottom: 5px;
   color: #fff;
   font-size: 2rem;
 }
 
-.control-section {
-  margin-bottom: 25px;
-  background: rgba(255, 255, 255, 0.05);
+.header-title p {
+  margin: 0;
+  color: #888;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.filters-section {
   padding: 20px;
+}
+
+.control-section {
+  margin-bottom: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -280,6 +295,14 @@ button:active {
   background: #777;
 }
 
+#open-modal {
+  background: #e29d4a;
+}
+
+#open-modal:hover {
+  background: #bd7a35;
+}
+
 #coordinates {
   color: #ccc;
   font-size: 0.9rem;
@@ -290,7 +313,7 @@ main {
   justify-content: center;
   align-items: center;
   position: relative;
-  padding: 20px;
+  padding: 20px 20px 10px 20px;
 }
 
 #starmap {
@@ -344,30 +367,6 @@ main {
   color: #ccc;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .filter-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-summary {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  #starmap {
-    width: 100%;
-    max-width: 400px;
-    height: 400px;
-  }
-
-  .dual-slider-values {
-    justify-content: center;
-  }
-}
-
-/* Lägg till i slutet av styles.css: */
-
 /* Modal Styles */
 .modal {
   position: fixed;
@@ -419,6 +418,12 @@ main {
   padding: 30px;
   color: #fff;
   line-height: 1.6;
+}
+
+.modal-content h1 {
+  color: #4a90e2;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
 }
 
 .modal-content h2 {
@@ -503,10 +508,24 @@ main {
   transform: translateY(-2px);
 }
 
-#open-modal {
-  background: #e29d4a;
-}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
 
-#open-modal:hover {
-  background: #bd7a35;
+  .filter-summary {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  #starmap {
+    width: 100%;
+    max-width: 400px;
+    height: 400px;
+  }
+
+  .dual-slider-values {
+    justify-content: center;
+  }
 }

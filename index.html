@@ -21,15 +21,28 @@
 <body>
     <div id="app">
         <header>
-            <h1>Star Map Filter</h1>
+            <div class="header-title">
+                <h1>Star Map Filter</h1>
+                <p>by Paul Belfrage</p>
+            </div>
+        </header>
 
+        <main>
+            <canvas id="starmap" width="900" height="900"></canvas>
+            <div id="star-info" class="hidden">
+                <h3 id="star-name">Star Name</h3>
+                <p id="star-details"></p>
+                <button id="close-info">×</button>
+            </div>
+        </main>
+
+        <section class="filters-section">
             <!-- Location Controls -->
             <div class="control-section">
                 <h3>Location</h3>
                 <div class="controls">
                     <button id="get-location">Get My Location</button>
                     <span id="coordinates">Location: Not detected</span>
-                    <!-- Lägg till knapp för att öppna modal -->
                     <button id="open-modal">About & Contact</button>
                 </div>
             </div>
@@ -124,17 +137,7 @@
                     <button id="reset-filters">Reset All Filters</button>
                 </div>
             </div>
-        </header>
-
-        <main>
-            <canvas id="starmap" width="900" height="900"></canvas>
-            <div id="star-info" class="hidden">
-                <h3 id="star-name">Star Name</h3>
-                <p id="star-details"></p>
-                <button id="close-info">×</button>
-                img
-            </div>
-        </main>
+        </section>
     </div>
 
     <!-- Modal Dialog -->
@@ -148,9 +151,6 @@
                 brightness (magnitude), distance, age, and mass. Users can click on individual stars to see detailed
                 information and can also filter stars using the range sliders. The visualization provides an educational
                 tool for understanding stellar properties and distributions.</p>
-
-
-
 
             <p>See the project on <a href="https://github.com/paul-pauliskolan/astro-guide/tree/master/starmap-app"
                     target="_blank">GitHub</a></p>
