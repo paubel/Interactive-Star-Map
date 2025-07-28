@@ -56,6 +56,7 @@ class StarMapApp {
 
     // Star selection and filtering events
     document.addEventListener("starSelected", (e) => {
+      console.log("StarSelected event received:", e.detail); // DEBUG
       this.showStarInfo(e.detail);
     });
 
@@ -255,25 +256,35 @@ class StarMapApp {
     }
   }
 
+  // I showStarInfo metoden i app.js, lägg till debug:
+
   showStarInfo(star) {
-    const infoPanel = document.getElementById("star-info");
-    const name = document.getElementById("star-name");
-    const details = document.getElementById("star-details");
+    console.log("Showing star info for:", star.name); // DEBUG
 
-    name.textContent = star.name;
-    details.innerHTML = `
-      <strong>Constellation:</strong> ${star.constellation}<br>
-      <strong>Magnitude:</strong> ${star.magnitude}<br>
-      <strong>Distance:</strong> ${star.distance} light years<br>
-      <strong>Age:</strong> ${star.age} billion years<br>
-      <strong>Mass:</strong> ${star.mass} solar masses<br>
-      <strong>Spectral Class:</strong> ${star.spectralClass}<br>
-      <strong>Description:</strong> ${star.description}
-    `;
+    const infoElement = document.getElementById("star-info");
+    const nameElement = document.getElementById("star-name");
+    const detailsElement = document.getElementById("star-details");
 
-    infoPanel.classList.remove("hidden");
+    nameElement.textContent = star.name;
+    detailsElement.innerHTML = `
+    <strong>Spectral Class:</strong> ${star.spectralClass}<br>
+    <strong>Magnitude:</strong> ${star.magnitude.toFixed(1)}<br>
+    <strong>Distance:</strong> ${star.distance.toFixed(1)} light years<br>
+    <strong>Age:</strong> ${star.age.toFixed(1)} billion years<br>
+    <strong>Mass:</strong> ${star.mass.toFixed(1)} solar masses
+  `;
+
+    infoElement.classList.remove("hidden");
+
+    console.log(
+      "Star info element visible:",
+      !infoElement.classList.contains("hidden")
+    ); // DEBUG
+    console.log(
+      "Element z-index:",
+      window.getComputedStyle(infoElement).zIndex
+    ); // DEBUG
   }
-
   hideStarInfo() {
     document.getElementById("star-info").classList.add("hidden");
     this.starMap.selectedStar = null;
@@ -285,3 +296,5 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM loaded, starting app");
   new StarMapApp();
 });
+
+// I setupEventListeners i app.js, uppdatera:

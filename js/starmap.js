@@ -297,8 +297,19 @@ class StarMap {
     }
   }
 
+  // Uppdatera drawStar metoden för att logga position (temporärt för debug):
+
   drawStar(star, x, y, alpha = 1.0) {
     const size = this.getStarSize(star.magnitude) * this.zoomLevel;
+
+    // DEBUG: Logga bara för Vega
+    if (star.name === "Vega") {
+      console.log(
+        `Vega position: canvas=(${x.toFixed(1)}, ${y.toFixed(
+          1
+        )}), size=${size.toFixed(1)}`
+      );
+    }
 
     let color = "#ffffff";
     if (star.spectralClass.startsWith("M")) color = "#ffaa77";
@@ -356,7 +367,7 @@ class StarMap {
 
     star.canvasX = x;
     star.canvasY = y;
-    star.radius = Math.max(glowSize, 12);
+    star.radius = Math.max(glowSize, 20); // Minimum radius för touch
   }
 
   drawSelectionRing(x, y) {
@@ -374,22 +385,23 @@ class StarMap {
   }
 
   // UPPDATERAD MED ZOOM OCH TOUCH EVENTS
-  // Ersätt setupEventListeners metoden med denna:
+
+  // Ersätt hela setupEventListeners metoden i starmap.js:
 
   setupEventListeners() {
     let isDragging = false;
     let lastX = 0;
     let lastY = 0;
 
-    // Desktop click & drag
+    // Desktop events
     this.canvas.addEventListener("mousedown", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // Check if clicking on a star first
+      // Försök välja stjärna först
       if (!this.handleStarSelection(clickX, clickY)) {
-        // No star clicked, start dragging
+        // Ingen stjärna vald, börja dra
         isDragging = true;
         lastX = e.clientX;
         lastY = e.clientY;
@@ -446,38 +458,37 @@ class StarMap {
       this.canvas.style.cursor = "grab";
     });
 
-    // Touch events för mobil
+    // Touch events för mobil - FIXAD VERSION
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartTime = 0;
-    let isPanningTouch = false;
+    let hasMoved = false;
 
     this.canvas.addEventListener("touchstart", (e) => {
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
       touchStartTime = Date.now();
+      hasMoved = false;
 
-      if (e.touches.length === 1) {
-        // Single touch - kan vara star selection eller pan start
-        e.preventDefault();
-      } else if (e.touches.length === 2) {
+      if (e.touches.length === 2) {
         // Pinch zoom
         this.lastTouchDistance = this.getTouchDistance(e.touches);
-        e.preventDefault();
       }
+
+      e.preventDefault();
     });
 
     this.canvas.addEventListener("touchmove", (e) => {
       if (e.touches.length === 1) {
-        // Single touch pan
+        // Single touch
         const touch = e.touches[0];
         const deltaX = touch.clientX - touchStartX;
         const deltaY = touch.clientY - touchStartY;
 
-        // Om användaren har rört sig mer än 10px, börja panning
-        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
-          isPanningTouch = true;
+        // Om användaren har rört sig mer än 15px, räkna som pan
+        if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) {
+          hasMoved = true;
 
           this.panX += deltaX;
           this.panY += deltaY;
@@ -487,7 +498,6 @@ class StarMap {
 
           this.render();
         }
-        e.preventDefault();
       } else if (e.touches.length === 2) {
         // Pinch zoom
         const currentDistance = this.getTouchDistance(e.touches);
@@ -501,22 +511,31 @@ class StarMap {
 
         this.lastTouchDistance = currentDistance;
         this.render();
-        e.preventDefault();
       }
+
+      e.preventDefault();
     });
 
     this.canvas.addEventListener("touchend", (e) => {
       e.preventDefault();
 
-      // Om det var en kort touch utan panning, försök välja stjärna
-      if (!isPanningTouch && Date.now() - touchStartTime < 200) {
+      // VIKTIGT: Endast försök välja stjärna om det var kort touch utan rörelse
+      if (!hasMoved && Date.now() - touchStartTime < 300) {
+        console.log("Touch tap detected, trying star selection..."); // DEBUG
+
         const rect = this.canvas.getBoundingClientRect();
         const touchX = touchStartX - rect.left;
         const touchY = touchStartY - rect.top;
-        this.handleStarSelection(touchX, touchY);
+
+        console.log(`Touch coordinates: ${touchX}, ${touchY}`); // DEBUG
+
+        const starSelected = this.handleStarSelection(touchX, touchY);
+        console.log("Star selected:", starSelected); // DEBUG
+      } else if (hasMoved) {
+        console.log("Touch was a pan gesture, not selecting star"); // DEBUG
       }
 
-      isPanningTouch = false;
+      hasMoved = false;
     });
 
     // Mouse wheel zoom
@@ -532,17 +551,24 @@ class StarMap {
     });
   }
 
-  // Ersätt handleStarSelection metoden:
-
   handleStarSelection(x, y) {
+    console.log(`Checking star selection at: ${x}, ${y}`); // DEBUG
+
     const distFromCenter = Math.sqrt(
       Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2)
     );
 
-    if (distFromCenter > this.horizonRadius * this.zoomLevel * 1.5)
+    if (distFromCenter > this.horizonRadius * this.zoomLevel * 1.5) {
+      console.log("Click outside horizon circle"); // DEBUG
       return false;
+    }
 
     const visibleStars = this.getVisibleStars();
+    console.log(`Checking against ${visibleStars.length} visible stars`); // DEBUG
+
+    // Hitta den stjärna som är NÄRMAST klick-punkten
+    let closestStar = null;
+    let closestDistance = Infinity;
 
     for (let star of visibleStars) {
       if (star.canvasX && star.canvasY) {
@@ -550,24 +576,49 @@ class StarMap {
           Math.pow(x - star.canvasX, 2) + Math.pow(y - star.canvasY, 2)
         );
 
+        // Använd stjärnans faktiska radius + lite extra för mobil
         const hitRadius =
-          window.innerWidth <= 768 ? star.radius + 8 : star.radius;
+          window.innerWidth <= 768 ? star.radius + 30 : star.radius + 10;
 
-        if (distance <= hitRadius) {
-          this.selectStar(star);
-          return true; // Stjärna vald
+        console.log(
+          `Star ${star.name}: pos=(${star.canvasX.toFixed(
+            1
+          )}, ${star.canvasY.toFixed(1)}), distance=${distance.toFixed(
+            1
+          )}, hitRadius=${hitRadius.toFixed(1)}`
+        ); // DEBUG
+
+        // Om stjärnan är inom hit-radius OCH närmare än tidigare kandidater
+        if (distance <= hitRadius && distance < closestDistance) {
+          closestStar = star;
+          closestDistance = distance;
         }
       }
     }
 
-    return false; // Ingen stjärna vald
+    if (closestStar) {
+      console.log(
+        `Selected closest star: ${
+          closestStar.name
+        } at distance ${closestDistance.toFixed(1)}`
+      ); // DEBUG
+      this.selectStar(closestStar);
+      return true;
+    }
+
+    console.log("No star found within hit radius"); // DEBUG
+    return false;
   }
 
+  // Uppdatera selectStar metoden:
+
   selectStar(star) {
+    console.log(`Selecting star: ${star.name}`); // DEBUG
     this.selectedStar = star;
     this.render();
 
     const event = new CustomEvent("starSelected", { detail: star });
+    console.log("Dispatching starSelected event:", event); // DEBUG
     document.dispatchEvent(event);
   }
 
