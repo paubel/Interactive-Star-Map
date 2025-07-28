@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Star Map</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div id="app">
+        <header>
+            <h1>Interactive Star Map</h1>
+
+            <!-- Location Controls -->
+            <div class="control-section">
+                <h3>Location</h3>
+                <div class="controls">
+                    <button id="get-location">Get My Location</button>
+                    <span id="coordinates">Location: Not detected</span>
+                    <!-- Lägg till knapp för att öppna modal -->
+                    <button id="open-modal">About & Contact</button>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="control-section">
+                <h3>Star Filters</h3>
+                <div class="filter-grid">
+                    <div class="filter-control">
+                        <label for="magnitude-range">Brightness (Magnitude)</label>
+                        <div class="dual-slider-container">
+                            <div class="dual-slider">
+                                <input type="range" id="magnitude-min" min="-2" max="6" value="-2" step="0.1">
+                                <input type="range" id="magnitude-max" min="-2" max="6" value="4" step="0.1">
+                            </div>
+                            <div class="dual-slider-values">
+                                <span id="magnitude-min-value" class="slider-value">-2.0</span>
+                                <span class="slider-separator">to</span>
+                                <span id="magnitude-max-value" class="slider-value">4.0</span>
+                            </div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>Very Bright</span>
+                            <span>Dim</span>
+                        </div>
+                    </div>
+
+                    <div class="filter-control">
+                        <label for="distance-range">Distance (Light Years)</label>
+                        <div class="dual-slider-container">
+                            <div class="dual-slider">
+                                <input type="range" id="distance-min" min="1" max="3000" value="1" step="10">
+                                <input type="range" id="distance-max" min="1" max="3000" value="1000" step="10">
+                            </div>
+                            <div class="dual-slider-values">
+                                <span id="distance-min-value" class="slider-value">1</span>
+                                <span class="slider-separator">to</span>
+                                <span id="distance-max-value" class="slider-value">1000</span>
+                                <span class="slider-unit">ly</span>
+                            </div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>Close</span>
+                            <span>Far</span>
+                        </div>
+                    </div>
+
+                    <div class="filter-control">
+                        <label for="age-range">Age (Billion Years)</label>
+                        <div class="dual-slider-container">
+                            <div class="dual-slider">
+                                <input type="range" id="age-min" min="0" max="15" value="0" step="0.1">
+                                <input type="range" id="age-max" min="0" max="15" value="10" step="0.1">
+                            </div>
+                            <div class="dual-slider-values">
+                                <span id="age-min-value" class="slider-value">0.0</span>
+                                <span class="slider-separator">to</span>
+                                <span id="age-max-value" class="slider-value">10.0</span>
+                                <span class="slider-unit">Gy</span>
+                            </div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>Young</span>
+                            <span>Old</span>
+                        </div>
+                    </div>
+
+                    <div class="filter-control">
+                        <label for="mass-range">Mass (Solar Masses)</label>
+                        <div class="dual-slider-container">
+                            <div class="dual-slider">
+                                <input type="range" id="mass-min" min="0.1" max="50" value="0.1" step="0.1">
+                                <input type="range" id="mass-max" min="0.1" max="50" value="25" step="0.1">
+                            </div>
+                            <div class="dual-slider-values">
+                                <span id="mass-min-value" class="slider-value">0.1</span>
+                                <span class="slider-separator">to</span>
+                                <span id="mass-max-value" class="slider-value">25.0</span>
+                                <span class="slider-unit">M☉</span>
+                            </div>
+                        </div>
+                        <div class="slider-labels">
+                            <span>Light</span>
+                            <span>Heavy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Summary -->
+                <div class="filter-summary">
+                    <span id="visible-count">Showing all stars</span>
+                    <button id="reset-filters">Reset All Filters</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <canvas id="starmap" width="900" height="900"></canvas>
+            <div id="star-info" class="hidden">
+                <h3 id="star-name"></h3>
+                <p id="star-details"></p>
+                <button id="close-info">×</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Dialog -->
+    <dialog class="modal" id="modal">
+        <button class="button close-button" id="close-modal">×</button>
+
+        <div class="modal-content">
+            <h2>About Interactive Star Map</h2>
+            <p>This project is an interactive star map that allows users to explore various properties of stars such as
+                brightness (magnitude), distance, age, and mass. Users can click on individual stars to see detailed
+                information and can also filter stars using the range sliders. The visualization provides an educational
+                tool for understanding stellar properties and distributions.</p>
+
+
+
+
+            <p>See the project on <a href="https://github.com/paul-pauliskolan/astro-guide/tree/master/starmap-app"
+                    target="_blank">GitHub</a></p>
+
+            <h3>Contact Form</h3>
+            <p>If you want to contact me, please fill in this form:</p>
+
+            <form class="contact-form" target="_blank" action="https://formsubmit.co/fc585dbcd8ea518bfccc9c4030074c61"
+                method="POST">
+                <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                <textarea class="contact-textarea" placeholder="Your Message" name="message" rows="6"
+                    required></textarea>
+                <button class="contact-button" type="submit">Submit Form</button>
+            </form>
+        </div>
+    </dialog>
+
+    <script src="js/stardata.js"></script>
+    <script src="js/geolocation.js"></script>
+    <script src="js/starmap.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
