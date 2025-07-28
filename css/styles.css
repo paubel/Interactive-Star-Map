@@ -311,12 +311,11 @@ main {
   padding: 20px;
 }
 
-/* RESPONSIV CANVAS - HUVUDFIX */
-/* ALTERNATIV: Kvadratisk canvas som alltid ser bra ut */
+/* RESPONSIV CANVAS */
 #starmap {
   width: 100%;
-  max-width: 800px;
-  aspect-ratio: 1 / 1; /* Gör canvas kvadratisk */
+  max-width: 600px;
+  aspect-ratio: 1 / 1;
   border: 2px solid #333;
   border-radius: 10px;
   background: radial-gradient(circle, #001122, #000000);
