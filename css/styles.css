@@ -308,10 +308,15 @@ main {
   justify-content: center;
   align-items: center;
   position: relative;
-  padding: 20px 20px 10px 20px;
+  padding: 20px;
 }
 
+/* RESPONSIV CANVAS - HUVUDFIX */
+/* ALTERNATIV: Kvadratisk canvas som alltid ser bra ut */
 #starmap {
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 1 / 1; /* Gör canvas kvadratisk */
   border: 2px solid #333;
   border-radius: 10px;
   background: radial-gradient(circle, #001122, #000000);
@@ -320,13 +325,14 @@ main {
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  display: block;
+  margin: 0 auto;
 }
 
 #starmap:active {
   cursor: grabbing;
 }
 
-/* STAR INFO - DESKTOP VERSION */
 #star-info {
   position: absolute;
   top: 20px;
@@ -342,7 +348,7 @@ main {
 }
 
 #star-info.hidden {
-  display: none !important;
+  display: none;
 }
 
 #close-info {
@@ -378,7 +384,6 @@ main {
   color: #ccc;
 }
 
-/* ZOOM CONTROLS */
 .zoom-controls {
   position: absolute;
   bottom: 20px;
@@ -422,7 +427,6 @@ main {
   z-index: 100;
 }
 
-/* Modal Styles */
 .modal {
   position: fixed;
   top: 50%;
@@ -509,7 +513,6 @@ main {
   text-decoration: underline;
 }
 
-/* Contact Form Styles */
 .contact-form {
   margin-top: 20px;
   display: flex;
@@ -563,8 +566,8 @@ main {
   transform: translateY(-2px);
 }
 
-/* MOBILE RESPONSIVE */
-@media (max-width: 168px) {
+/* MOBIL RESPONSIVE */
+@media (max-width: 768px) {
   .filter-grid {
     grid-template-columns: 1fr;
   }
@@ -572,12 +575,6 @@ main {
   .filter-summary {
     flex-direction: column;
     gap: 10px;
-  }
-
-  #starmap {
-    width: 100%;
-    max-width: 400px;
-    height: 400px;
   }
 
   .dual-slider-values {
@@ -598,7 +595,7 @@ main {
     max-height: 90vh;
   }
 
-  /* STAR-INFO FÖR MOBIL - OVERRIDE DESKTOP VERSION */
+  /* STAR INFO MOBIL OVERLAY */
   #star-info {
     position: fixed !important;
     top: 50% !important;
@@ -612,7 +609,6 @@ main {
     z-index: 2000 !important;
   }
 
-  /* Backdrop för star-info */
   #star-info:not(.hidden)::before {
     content: "";
     position: fixed;
@@ -640,7 +636,6 @@ main {
     font-size: 20px !important;
   }
 
-  /* Zoom kontroller */
   .zoom-controls {
     bottom: 10px;
     right: 10px;
@@ -653,7 +648,6 @@ main {
   }
 }
 
-/* Extra små skärmar */
 @media (max-width: 480px) {
   #star-info {
     width: 95% !important;

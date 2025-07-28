@@ -10,17 +10,11 @@ class StarMap {
     this.ageRange = { min: 0, max: 15.0 };
     this.massRange = { min: 0.1, max: 50.0 };
 
-    this.latitude = 59.3293; // Default to Stockholm
+    this.latitude = 59.3293;
     this.longitude = 18.0686;
     this.selectedStar = null;
 
-    // Sky dome parameters
-    this.centerX = this.canvas.width / 2;
-    this.centerY = this.canvas.height / 2;
-    this.horizonRadius =
-      Math.min(this.canvas.width, this.canvas.height) / 2 - 30;
-
-    // ZOOM PROPERTIES - NYTT
+    // Zoom properties
     this.zoomLevel = 1;
     this.minZoom = 0.5;
     this.maxZoom = 3;
@@ -28,7 +22,39 @@ class StarMap {
     this.panY = 0;
     this.lastTouchDistance = 0;
 
+    // RESPONSIV SETUP
+    this.setupCanvas();
     this.setupEventListeners();
+    this.render();
+  }
+
+  // RESPONSIV CANVAS SETUP
+  setupCanvas() {
+    const rect = this.canvas.getBoundingClientRect();
+
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+
+    this.centerX = this.canvas.width / 2;
+    this.centerY = this.canvas.height / 2;
+    this.horizonRadius =
+      Math.min(this.canvas.width, this.canvas.height) / 2 - 30;
+
+    window.addEventListener("resize", () => {
+      this.resizeCanvas();
+    });
+  }
+
+  resizeCanvas() {
+    const rect = this.canvas.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+
+    this.centerX = this.canvas.width / 2;
+    this.centerY = this.canvas.height / 2;
+    this.horizonRadius =
+      Math.min(this.canvas.width, this.canvas.height) / 2 - 30;
+
     this.render();
   }
 
@@ -60,7 +86,6 @@ class StarMap {
     );
   }
 
-  // UPPDATERAD MED ZOOM
   celestialToCanvas(ra, dec) {
     const now = new Date();
     const lst = this.getLocalSiderealTime(now);
@@ -154,7 +179,6 @@ class StarMap {
       }
     }
 
-    // UPPDATERA ZOOM INFO
     this.updateZoomInfo();
 
     const event = new CustomEvent("starsFiltered", {
@@ -297,19 +321,8 @@ class StarMap {
     }
   }
 
-  // Uppdatera drawStar metoden för att logga position (temporärt för debug):
-
   drawStar(star, x, y, alpha = 1.0) {
     const size = this.getStarSize(star.magnitude) * this.zoomLevel;
-
-    // DEBUG: Logga bara för Vega
-    if (star.name === "Vega") {
-      console.log(
-        `Vega position: canvas=(${x.toFixed(1)}, ${y.toFixed(
-          1
-        )}), size=${size.toFixed(1)}`
-      );
-    }
 
     let color = "#ffffff";
     if (star.spectralClass.startsWith("M")) color = "#ffaa77";
@@ -345,7 +358,6 @@ class StarMap {
     this.ctx.arc(x, y, size, 0, 2 * Math.PI);
     this.ctx.fill();
 
-    // Förbättrad text-rendering
     this.ctx.save();
 
     const fontSize = (window.innerWidth <= 768 ? 12 : 10) * this.zoomLevel;
@@ -367,7 +379,7 @@ class StarMap {
 
     star.canvasX = x;
     star.canvasY = y;
-    star.radius = Math.max(glowSize, 20); // Minimum radius för touch
+    star.radius = Math.max(glowSize, 20);
   }
 
   drawSelectionRing(x, y) {
@@ -384,10 +396,6 @@ class StarMap {
     this.ctx.stroke();
   }
 
-  // UPPDATERAD MED ZOOM OCH TOUCH EVENTS
-
-  // Ersätt hela setupEventListeners metoden i starmap.js:
-
   setupEventListeners() {
     let isDragging = false;
     let lastX = 0;
@@ -399,9 +407,7 @@ class StarMap {
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // Försök välja stjärna först
       if (!this.handleStarSelection(clickX, clickY)) {
-        // Ingen stjärna vald, börja dra
         isDragging = true;
         lastX = e.clientX;
         lastY = e.clientY;
@@ -421,30 +427,6 @@ class StarMap {
         lastY = e.clientY;
 
         this.render();
-      } else if (window.innerWidth > 768) {
-        // Mouse hover för desktop
-        const rect = this.canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        let overStar = false;
-        const visibleStars = this.getVisibleStars();
-
-        for (let star of visibleStars) {
-          if (star.canvasX && star.canvasY) {
-            const distance = Math.sqrt(
-              Math.pow(mouseX - star.canvasX, 2) +
-                Math.pow(mouseY - star.canvasY, 2)
-            );
-
-            if (distance <= star.radius) {
-              overStar = true;
-              break;
-            }
-          }
-        }
-
-        this.canvas.style.cursor = overStar ? "pointer" : "grab";
       }
     });
 
@@ -458,84 +440,35 @@ class StarMap {
       this.canvas.style.cursor = "grab";
     });
 
-    // Touch events för mobil - FIXAD VERSION
+    // ENKLARE TOUCH EVENTS
     let touchStartX = 0;
     let touchStartY = 0;
-    let touchStartTime = 0;
-    let hasMoved = false;
+    let touchMoved = false;
 
     this.canvas.addEventListener("touchstart", (e) => {
       const touch = e.touches[0];
       touchStartX = touch.clientX;
       touchStartY = touch.clientY;
-      touchStartTime = Date.now();
-      hasMoved = false;
-
-      if (e.touches.length === 2) {
-        // Pinch zoom
-        this.lastTouchDistance = this.getTouchDistance(e.touches);
-      }
-
+      touchMoved = false;
       e.preventDefault();
     });
 
     this.canvas.addEventListener("touchmove", (e) => {
-      if (e.touches.length === 1) {
-        // Single touch
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
-
-        // Om användaren har rört sig mer än 15px, räkna som pan
-        if (Math.abs(deltaX) > 15 || Math.abs(deltaY) > 15) {
-          hasMoved = true;
-
-          this.panX += deltaX;
-          this.panY += deltaY;
-
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
-
-          this.render();
-        }
-      } else if (e.touches.length === 2) {
-        // Pinch zoom
-        const currentDistance = this.getTouchDistance(e.touches);
-        const zoomFactor = currentDistance / this.lastTouchDistance;
-
-        this.zoomLevel *= zoomFactor;
-        this.zoomLevel = Math.max(
-          this.minZoom,
-          Math.min(this.maxZoom, this.zoomLevel)
-        );
-
-        this.lastTouchDistance = currentDistance;
-        this.render();
-      }
-
+      touchMoved = true;
       e.preventDefault();
     });
 
     this.canvas.addEventListener("touchend", (e) => {
       e.preventDefault();
 
-      // VIKTIGT: Endast försök välja stjärna om det var kort touch utan rörelse
-      if (!hasMoved && Date.now() - touchStartTime < 300) {
-        console.log("Touch tap detected, trying star selection..."); // DEBUG
-
+      if (!touchMoved) {
         const rect = this.canvas.getBoundingClientRect();
-        const touchX = touchStartX - rect.left;
-        const touchY = touchStartY - rect.top;
-
-        console.log(`Touch coordinates: ${touchX}, ${touchY}`); // DEBUG
-
-        const starSelected = this.handleStarSelection(touchX, touchY);
-        console.log("Star selected:", starSelected); // DEBUG
-      } else if (hasMoved) {
-        console.log("Touch was a pan gesture, not selecting star"); // DEBUG
+        const x = touchStartX - rect.left;
+        const y = touchStartY - rect.top;
+        this.handleStarSelection(x, y);
       }
 
-      hasMoved = false;
+      touchMoved = false;
     });
 
     // Mouse wheel zoom
@@ -551,45 +484,21 @@ class StarMap {
     });
   }
 
+  // ENKEL STAR SELECTION
   handleStarSelection(x, y) {
-    console.log(`Checking star selection at: ${x}, ${y}`); // DEBUG
-
-    const distFromCenter = Math.sqrt(
-      Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2)
-    );
-
-    if (distFromCenter > this.horizonRadius * this.zoomLevel * 1.5) {
-      console.log("Click outside horizon circle"); // DEBUG
-      return false;
-    }
-
     const visibleStars = this.getVisibleStars();
-    console.log(`Checking against ${visibleStars.length} visible stars`); // DEBUG
+    const hitRadius = 50; // Stor hit-area för alla enheter
 
-    // Hitta den stjärna som är NÄRMAST klick-punkten
     let closestStar = null;
-    let closestDistance = Infinity;
+    let closestDistance = hitRadius;
 
-    for (let star of visibleStars) {
+    for (const star of visibleStars) {
       if (star.canvasX && star.canvasY) {
         const distance = Math.sqrt(
           Math.pow(x - star.canvasX, 2) + Math.pow(y - star.canvasY, 2)
         );
 
-        // Använd stjärnans faktiska radius + lite extra för mobil
-        const hitRadius =
-          window.innerWidth <= 768 ? star.radius + 30 : star.radius + 10;
-
-        console.log(
-          `Star ${star.name}: pos=(${star.canvasX.toFixed(
-            1
-          )}, ${star.canvasY.toFixed(1)}), distance=${distance.toFixed(
-            1
-          )}, hitRadius=${hitRadius.toFixed(1)}`
-        ); // DEBUG
-
-        // Om stjärnan är inom hit-radius OCH närmare än tidigare kandidater
-        if (distance <= hitRadius && distance < closestDistance) {
+        if (distance < closestDistance) {
           closestStar = star;
           closestDistance = distance;
         }
@@ -597,32 +506,21 @@ class StarMap {
     }
 
     if (closestStar) {
-      console.log(
-        `Selected closest star: ${
-          closestStar.name
-        } at distance ${closestDistance.toFixed(1)}`
-      ); // DEBUG
       this.selectStar(closestStar);
       return true;
     }
 
-    console.log("No star found within hit radius"); // DEBUG
     return false;
   }
 
-  // Uppdatera selectStar metoden:
-
   selectStar(star) {
-    console.log(`Selecting star: ${star.name}`); // DEBUG
     this.selectedStar = star;
     this.render();
 
     const event = new CustomEvent("starSelected", { detail: star });
-    console.log("Dispatching starSelected event:", event); // DEBUG
     document.dispatchEvent(event);
   }
 
-  // NYA ZOOM METODER
   getTouchDistance(touches) {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
@@ -631,11 +529,13 @@ class StarMap {
 
   zoomIn() {
     this.zoomLevel = Math.min(this.maxZoom, this.zoomLevel * 1.2);
+    this.updateZoomInfo();
     this.render();
   }
 
   zoomOut() {
     this.zoomLevel = Math.max(this.minZoom, this.zoomLevel / 1.2);
+    this.updateZoomInfo();
     this.render();
   }
 
@@ -643,6 +543,7 @@ class StarMap {
     this.zoomLevel = 1;
     this.panX = 0;
     this.panY = 0;
+    this.updateZoomInfo();
     this.render();
   }
 
