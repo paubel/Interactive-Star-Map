@@ -38,7 +38,7 @@
                 <h3>Star Filters</h3>
                 <div class="filter-grid">
                     <div class="filter-control">
-                        <label for="magnitude-range">Brightness (Magnitude)</label>
+                        <label>Brightness (Magnitude)</label>
                         <div class="dual-slider-container">
                             <div class="dual-slider">
                                 <input type="range" id="magnitude-min" min="-2" max="6" value="-2" step="0.1">
@@ -57,7 +57,7 @@
                     </div>
 
                     <div class="filter-control">
-                        <label for="distance-range">Distance (Light Years)</label>
+                        <label>Distance (Light Years)</label>
                         <div class="dual-slider-container">
                             <div class="dual-slider">
                                 <input type="range" id="distance-min" min="1" max="3000" value="1" step="10">
@@ -77,7 +77,7 @@
                     </div>
 
                     <div class="filter-control">
-                        <label for="age-range">Age (Billion Years)</label>
+                        <label>Age (Billion Years)</label>
                         <div class="dual-slider-container">
                             <div class="dual-slider">
                                 <input type="range" id="age-min" min="0" max="15" value="0" step="0.1">
@@ -97,7 +97,7 @@
                     </div>
 
                     <div class="filter-control">
-                        <label for="mass-range">Mass (Solar Masses)</label>
+                        <label>Mass (Solar Masses)</label>
                         <div class="dual-slider-container">
                             <div class="dual-slider">
                                 <input type="range" id="mass-min" min="0.1" max="50" value="0.1" step="0.1">
@@ -128,7 +128,7 @@
         <main>
             <canvas id="starmap" width="900" height="900"></canvas>
             <div id="star-info" class="hidden">
-                <h3 id="star-name"></h3>
+                <h3 id="star-name">Star Name</h3>
                 <p id="star-details"></p>
                 <button id="close-info">×</button>
             </div>
