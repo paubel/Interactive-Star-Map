@@ -525,6 +525,21 @@ main {
     height: 400px;
   }
 
+  /* Lägg till i styles.css: */
+
+  #starmap {
+    border: 2px solid #333;
+    border-radius: 10px;
+    background: radial-gradient(circle, #001122, #000000);
+    cursor: crosshair;
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.3);
+
+    /* Touch-optimering */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
   .dual-slider-values {
     justify-content: center;
   }

@@ -395,6 +395,7 @@ class StarMap {
   }
 
   setupEventListeners() {
+    // Desktop click event - BEFINTLIG KOD
     this.canvas.addEventListener("click", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
@@ -425,7 +426,43 @@ class StarMap {
       }
     });
 
-    // Add hover effect
+    // TOUCH EVENT FÖR MOBIL - NY KOD
+    this.canvas.addEventListener("touchstart", (e) => {
+      e.preventDefault(); // Förhindra scrolling
+
+      const rect = this.canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      const touchX = touch.clientX - rect.left;
+      const touchY = touch.clientY - rect.top;
+
+      // Samma logik som click event
+      const distFromCenter = Math.sqrt(
+        Math.pow(touchX - this.centerX, 2) + Math.pow(touchY - this.centerY, 2)
+      );
+
+      if (distFromCenter > this.horizonRadius * 1.5) return;
+
+      const visibleStars = this.getVisibleStars();
+
+      for (let star of visibleStars) {
+        if (star.canvasX && star.canvasY) {
+          const distance = Math.sqrt(
+            Math.pow(touchX - star.canvasX, 2) +
+              Math.pow(touchY - star.canvasY, 2)
+          );
+
+          // Lite större hit-area på mobil
+          const hitRadius = star.radius + 5;
+
+          if (distance <= hitRadius) {
+            this.selectStar(star);
+            break;
+          }
+        }
+      }
+    });
+
+    // Mouse hover event - BEFINTLIG KOD
     this.canvas.addEventListener("mousemove", (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
