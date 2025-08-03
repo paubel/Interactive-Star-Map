@@ -522,7 +522,6 @@ class StarMap {
           const x = touchStartX - rect.left;
           const y = touchStartY - rect.top;
 
-          console.log(`Mobile tap at: (${x.toFixed(1)}, ${y.toFixed(1)})`);
           this.handleStarSelection(x, y);
         }
       }
@@ -544,18 +543,11 @@ class StarMap {
 
   // FÖRBÄTTRAT STAR SELECTION
   handleStarSelection(x, y) {
-    console.log(
-      `Checking star selection at: (${x.toFixed(1)}, ${y.toFixed(1)})`
-    );
-
     const visibleStars = this.getVisibleStars();
     const isMobile = window.innerWidth <= 768;
 
     // MYCKET större hit radius på mobil
     const hitRadius = isMobile ? 80 : 40;
-
-    console.log(`Search radius: ${hitRadius}px, Mobile: ${isMobile}`);
-    console.log(`Visible stars to check: ${visibleStars.length}`);
 
     let closestStar = null;
     let closestDistance = hitRadius;
@@ -569,25 +561,15 @@ class StarMap {
         if (distance < closestDistance) {
           closestStar = star;
           closestDistance = distance;
-
-          if (isMobile) {
-            console.log(
-              `Found candidate: ${star.name} at distance ${distance.toFixed(
-                1
-              )}px`
-            );
-          }
         }
       }
     }
 
     if (closestStar) {
-      console.log(`✅ Selected: ${closestStar.name}`);
       this.selectStar(closestStar);
       return true;
     }
 
-    console.log(`❌ No star found within ${hitRadius}px`);
     return false;
   }
 

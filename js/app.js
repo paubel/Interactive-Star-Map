@@ -1,6 +1,5 @@
 class StarMapApp {
   constructor() {
-    console.log("Initializing StarMapApp");
     this.geolocation = new GeolocationService();
     this.starMap = new StarMap("starmap", STARS);
     this.setupEventListeners();
@@ -56,7 +55,6 @@ class StarMapApp {
 
     // Star selection and filtering events
     document.addEventListener("starSelected", (e) => {
-      console.log("StarSelected event received:", e.detail); // DEBUG
       this.showStarInfo(e.detail);
     });
 
@@ -217,13 +215,11 @@ class StarMapApp {
 
   // Modal functions
   openModal() {
-    console.log("Opening modal");
     const modal = document.getElementById("modal");
     modal.showModal();
   }
 
   closeModal() {
-    console.log("Closing modal");
     const modal = document.getElementById("modal");
     modal.close();
   }
@@ -249,7 +245,6 @@ class StarMapApp {
         button.disabled = false;
       }, 2000);
     } catch (error) {
-      console.error("Error getting location:", error);
       coordinates.textContent = `Error: ${error.message}`;
       button.textContent = "Try Again";
       button.disabled = false;
@@ -259,8 +254,6 @@ class StarMapApp {
   // I showStarInfo metoden i app.js, lägg till debug:
 
   showStarInfo(star) {
-    console.log("Showing star info for:", star.name); // DEBUG
-
     const infoElement = document.getElementById("star-info");
     const nameElement = document.getElementById("star-name");
     const detailsElement = document.getElementById("star-details");
@@ -275,15 +268,6 @@ class StarMapApp {
   `;
 
     infoElement.classList.remove("hidden");
-
-    console.log(
-      "Star info element visible:",
-      !infoElement.classList.contains("hidden")
-    ); // DEBUG
-    console.log(
-      "Element z-index:",
-      window.getComputedStyle(infoElement).zIndex
-    ); // DEBUG
   }
   hideStarInfo() {
     document.getElementById("star-info").classList.add("hidden");
@@ -293,7 +277,6 @@ class StarMapApp {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM loaded, starting app");
   new StarMapApp();
 });
 

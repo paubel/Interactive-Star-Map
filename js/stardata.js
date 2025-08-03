@@ -455,7 +455,7 @@ const STARS = [
     ra: 218.877,
     dec: 14.572,
     magnitude: 1.95,
-    constellation: "Virgo",
+    constellation: "Vela",
     distance: 260,
     spectralClass: "A1V",
     age: 0.2,
@@ -1123,5 +1123,3 @@ const STARS = [
     description: "Also known as Zeta Ophiuchi.",
   },
 ];
-
-console.log("Star data loaded:", STARS.length, "stars");
