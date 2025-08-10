@@ -42,7 +42,7 @@ Filter stars by multiple criteria:
 
 ## Live Demo
 
-Visit the live application: [Star Map Filter](https://your-domain.com)
+Visit the live application: [Star Map Filter](https://starmapfilter.netlify.app/)
 
 ## Technologies Used
 
