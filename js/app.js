@@ -1,15 +1,22 @@
 class StarMapApp {
   constructor() {
-    this.geolocation = new GeolocationService();
-    this.starMap = new StarMap("starmap", STARS);
+    this.starMap = new StarMap("star-map", STARS);
     this.setupEventListeners();
-    this.updateAllDisplays();
     this.setupDualSliders();
+    this.updateAllDisplays();
+    this.updateFilters();
   }
 
   setupEventListeners() {
     // Dual range sliders
-    ["magnitude", "distance", "age", "mass"].forEach((type) => {
+    [
+      "magnitude",
+      "distance",
+      "age",
+      "mass",
+      "luminosity",
+      "temperature",
+    ].forEach((type) => {
       document.getElementById(`${type}-min`).addEventListener("input", () => {
         this.handleDualSliderChange(type);
         this.updateFilters();
@@ -25,32 +32,19 @@ class StarMapApp {
       this.resetFilters();
     });
 
-    // Geolocation button
+    // Location button
     document.getElementById("get-location").addEventListener("click", () => {
-      this.getLocation();
+      this.getUserLocation();
     });
 
-    // Modal buttons
-    document.getElementById("open-modal").addEventListener("click", () => {
-      this.openModal();
+    // Show modal button
+    document.getElementById("show-info").addEventListener("click", () => {
+      this.showModal();
     });
 
+    // Close modal button
     document.getElementById("close-modal").addEventListener("click", () => {
       this.closeModal();
-    });
-
-    // Close modal on backdrop click
-    document.getElementById("modal").addEventListener("click", (e) => {
-      if (e.target === document.getElementById("modal")) {
-        this.closeModal();
-      }
-    });
-
-    // Close modal on Escape key
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        this.closeModal();
-      }
     });
 
     // Star selection and filtering events
@@ -66,7 +60,7 @@ class StarMapApp {
       this.hideStarInfo();
     });
 
-    // ZOOM CONTROLS - LÄGG TILL DESSA
+    // Zoom controls
     document.getElementById("zoom-in").addEventListener("click", () => {
       this.starMap.zoomIn();
     });
@@ -80,9 +74,27 @@ class StarMapApp {
     });
   }
 
+  // ✅ LÄGG TILL DESSA METODER LÄNGST NER I KLASSEN (efter hideStarInfo)
+  showModal() {
+    const modal = document.getElementById("modal");
+    modal.showModal();
+  }
+
+  closeModal() {
+    const modal = document.getElementById("modal");
+    modal.close();
+  }
+
   setupDualSliders() {
     // Initialize dual slider functionality
-    ["magnitude", "distance", "age", "mass"].forEach((type) => {
+    [
+      "magnitude",
+      "distance",
+      "age",
+      "mass",
+      "luminosity",
+      "temperature",
+    ].forEach((type) => {
       this.updateSliderBackground(type);
     });
   }
@@ -94,37 +106,19 @@ class StarMapApp {
     let minVal = parseFloat(minSlider.value);
     let maxVal = parseFloat(maxSlider.value);
 
-    // Ensure min is always less than or equal to max
+    // Ensure min is not greater than max
     if (minVal > maxVal) {
-      if (event.target === minSlider) {
-        maxSlider.value = minVal;
+      if (minSlider === document.activeElement) {
         maxVal = minVal;
+        maxSlider.value = maxVal;
       } else {
-        minSlider.value = maxVal;
         minVal = maxVal;
+        minSlider.value = minVal;
       }
     }
 
-    this.updateSliderBackground(type);
     this.updateSliderDisplays(type);
-  }
-
-  updateSliderBackground(type) {
-    const minSlider = document.getElementById(`${type}-min`);
-    const maxSlider = document.getElementById(`${type}-max`);
-    const container = minSlider.parentElement;
-
-    const min = parseFloat(minSlider.min);
-    const max = parseFloat(minSlider.max);
-    const minVal = parseFloat(minSlider.value);
-    const maxVal = parseFloat(maxSlider.value);
-
-    const minPercent = ((minVal - min) / (max - min)) * 100;
-    const maxPercent = ((maxVal - min) / (max - min)) * 100;
-
-    // Update CSS custom properties
-    container.style.setProperty("--range-left", `${minPercent}%`);
-    container.style.setProperty("--range-width", `${maxPercent - minPercent}%`);
+    this.updateSliderBackground(type);
   }
 
   updateSliderDisplays(type) {
@@ -150,10 +144,55 @@ class StarMapApp {
         minDisplay = minVal.toFixed(1);
         maxDisplay = maxVal.toFixed(1);
         break;
+      case "luminosity":
+        if (minVal >= 1000) {
+          minDisplay = (minVal / 1000).toFixed(0) + "k";
+        } else {
+          minDisplay = minVal.toFixed(1);
+        }
+        if (maxVal >= 1000) {
+          maxDisplay = (maxVal / 1000).toFixed(0) + "k";
+        } else {
+          maxDisplay = maxVal.toFixed(1);
+        }
+        break;
+      case "temperature":
+        if (minVal >= 1000) {
+          minDisplay = (minVal / 1000).toFixed(0) + "k";
+        } else {
+          minDisplay = Math.round(minVal);
+        }
+        if (maxVal >= 1000) {
+          maxDisplay = (maxVal / 1000).toFixed(0) + "k";
+        } else {
+          maxDisplay = Math.round(maxVal);
+        }
+        break;
     }
 
     document.getElementById(`${type}-min-value`).textContent = minDisplay;
     document.getElementById(`${type}-max-value`).textContent = maxDisplay;
+  }
+
+  updateSliderBackground(type) {
+    const minSlider = document.getElementById(`${type}-min`);
+    const maxSlider = document.getElementById(`${type}-max`);
+    const min = parseFloat(minSlider.min);
+    const max = parseFloat(minSlider.max);
+    const minVal = parseFloat(minSlider.value);
+    const maxVal = parseFloat(maxSlider.value);
+
+    const minPercent = ((minVal - min) / (max - min)) * 100;
+    const maxPercent = ((maxVal - min) / (max - min)) * 100;
+
+    const track = minSlider.parentElement;
+    track.style.background = `linear-gradient(to right, 
+            rgba(255, 255, 255, 0.1) 0%, 
+            rgba(255, 255, 255, 0.1) ${minPercent}%, 
+            rgba(135, 206, 235, 0.6) ${minPercent}%, 
+            rgba(135, 206, 235, 0.6) ${maxPercent}%, 
+            rgba(255, 255, 255, 0.1) ${maxPercent}%, 
+            rgba(255, 255, 255, 0.1) 100%)`;
   }
 
   updateFilters() {
@@ -177,81 +216,105 @@ class StarMapApp {
       max: parseFloat(document.getElementById("mass-max").value),
     };
 
+    const luminosityRange = {
+      min: parseFloat(document.getElementById("luminosity-min").value),
+      max: parseFloat(document.getElementById("luminosity-max").value),
+    };
+
+    const temperatureRange = {
+      min: parseFloat(document.getElementById("temperature-min").value),
+      max: parseFloat(document.getElementById("temperature-max").value),
+    };
+
     this.starMap.setRangeFilters(
       magnitudeRange,
       distanceRange,
       ageRange,
-      massRange
+      massRange,
+      luminosityRange,
+      temperatureRange
     );
   }
 
   updateAllDisplays() {
-    ["magnitude", "distance", "age", "mass"].forEach((type) => {
+    [
+      "magnitude",
+      "distance",
+      "age",
+      "mass",
+      "luminosity",
+      "temperature",
+    ].forEach((type) => {
       this.updateSliderDisplays(type);
       this.updateSliderBackground(type);
     });
   }
 
+  // Update resetFilters method:
+
   resetFilters() {
-    // Reset to default values
+    // ✅ OPTIMIZED reset values based on actual data ranges
     document.getElementById("magnitude-min").value = -2;
     document.getElementById("magnitude-max").value = 4;
     document.getElementById("distance-min").value = 1;
-    document.getElementById("distance-max").value = 1000;
+    document.getElementById("distance-max").value = 3000;
     document.getElementById("age-min").value = 0;
-    document.getElementById("age-max").value = 10;
-    document.getElementById("mass-min").value = 0.1;
-    document.getElementById("mass-max").value = 25;
+    document.getElementById("age-max").value = 8;
+    document.getElementById("mass-min").value = 0.5;
+    document.getElementById("mass-max").value = 35;
+    document.getElementById("luminosity-min").value = 0.1;
+    document.getElementById("luminosity-max").value = 1000000;
+    document.getElementById("temperature-min").value = 3000;
+    document.getElementById("temperature-max").value = 45000;
 
     this.updateAllDisplays();
     this.updateFilters();
   }
 
-  updateVisibleCount(visible, total) {
-    document.getElementById(
-      "visible-count"
-    ).textContent = `Showing ${visible} of ${total} stars`;
-  }
+  getUserLocation() {
+    if (navigator.geolocation) {
+      const button = document.getElementById("get-location");
+      button.textContent = "📡 Getting location...";
+      button.disabled = true;
 
-  // Modal functions
-  openModal() {
-    const modal = document.getElementById("modal");
-    modal.showModal();
-  }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
 
-  closeModal() {
-    const modal = document.getElementById("modal");
-    modal.close();
-  }
+          this.starMap.setUserLocation(lat, lon);
+          this.showLocationInfo(lat, lon);
 
-  async getLocation() {
-    const button = document.getElementById("get-location");
-    const coordinates = document.getElementById("coordinates");
-
-    button.textContent = "Getting location...";
-    button.disabled = true;
-
-    try {
-      const position = await this.geolocation.getCurrentPosition();
-      this.starMap.setLocation(position.latitude, position.longitude);
-
-      coordinates.textContent = `Location: ${position.latitude.toFixed(
-        4
-      )}°N, ${position.longitude.toFixed(4)}°E`;
-      button.textContent = "Location Updated";
-
-      setTimeout(() => {
-        button.textContent = "Get My Location";
-        button.disabled = false;
-      }, 2000);
-    } catch (error) {
-      coordinates.textContent = `Error: ${error.message}`;
-      button.textContent = "Try Again";
-      button.disabled = false;
+          button.textContent = "📍 Location Updated";
+          setTimeout(() => {
+            button.textContent = "📍 Use My Location";
+            button.disabled = false;
+          }, 2000);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          button.textContent = "❌ Location Error";
+          setTimeout(() => {
+            button.textContent = "📍 Use My Location";
+            button.disabled = false;
+          }, 2000);
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
     }
   }
 
-  // I showStarInfo metoden i app.js, lägg till debug:
+  showLocationInfo(lat, lon) {
+    document.getElementById("user-lat").textContent = lat.toFixed(4);
+    document.getElementById("user-lon").textContent = lon.toFixed(4);
+    document.getElementById("location-info").classList.remove("hidden");
+  }
+
+  updateVisibleCount(visible, total) {
+    document.getElementById("visible-count").textContent = visible;
+    document.getElementById("total-count").textContent = total;
+  }
 
   showStarInfo(star) {
     const infoElement = document.getElementById("star-info");
@@ -260,24 +323,31 @@ class StarMapApp {
 
     nameElement.textContent = star.name;
     detailsElement.innerHTML = `
-    <strong>Spectral Class:</strong> ${star.spectralClass}<br>
-    <strong>Magnitude:</strong> ${star.magnitude.toFixed(1)}<br>
-    <strong>Distance:</strong> ${star.distance.toFixed(1)} light years<br>
-    <strong>Age:</strong> ${star.age.toFixed(1)} billion years<br>
-    <strong>Mass:</strong> ${star.mass.toFixed(1)} solar masses
-  `;
+            <strong>Constellation:</strong> ${star.constellation}<br>
+            <strong>Spectral Class:</strong> ${star.spectralClass}<br>
+            <strong>Magnitude:</strong> ${star.magnitude.toFixed(1)}<br>
+            <strong>Distance:</strong> ${star.distance.toFixed(
+              1
+            )} light years<br>
+            <strong>Age:</strong> ${star.age.toFixed(1)} billion years<br>
+            <strong>Mass:</strong> ${star.mass.toFixed(1)} solar masses<br>
+            <strong>Luminosity:</strong> ${star.luminosity.toFixed(1)} L☉<br>
+            <strong>Temperature:</strong> ${star.temperature.toLocaleString()} K<br>
+            <strong>Radius:</strong> ${star.radius.toFixed(
+              1
+            )} solar radii<br><br>
+            ${star.description}
+        `;
 
     infoElement.classList.remove("hidden");
   }
+
   hideStarInfo() {
     document.getElementById("star-info").classList.add("hidden");
-    this.starMap.selectedStar = null;
-    this.starMap.render();
   }
 }
 
+// Initialize the app when the page loads
 document.addEventListener("DOMContentLoaded", () => {
   new StarMapApp();
 });
-
-// I setupEventListeners i app.js, uppdatera:

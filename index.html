@@ -2,154 +2,196 @@
 <html lang="en">
 
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W06ST0G043"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-W06ST0G043');
-    </script>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Star Map Filter</title>
-    <link rel="icon" type="image/x-icon" href="star_map_favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Star Map</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-    <div id="app">
-        <header>
-            <div class="header-title">
-                <h1>Star Map Filter</h1>
-                <p>by Paul Belfrage v0.92</p>
-            </div>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>Star Map Filter</h1>
+            <p>by Paul Belfrage v0.95</p>
         </header>
 
-        <main>
-            <canvas id="starmap"></canvas>
+        <main class="main-content">
+            <div class="controls-panel">
+                <div class="filter-section">
+                    <h3>Filters</h3>
+                    <div class="filter-grid">
+                        <div class="filter-control">
+                            <label>Brightness (Magnitude)</label>
+                            <div class="dual-slider-container">
+                                <div class="dual-slider">
+                                    <input type="range" id="magnitude-min" min="-2" max="6" value="-2" step="0.1">
+                                    <input type="range" id="magnitude-max" min="-2" max="6" value="4" step="0.1">
+                                </div>
+                                <div class="dual-slider-values">
+                                    <span id="magnitude-min-value" class="slider-value">-2.0</span>
+                                    <span class="slider-separator">to</span>
+                                    <span id="magnitude-max-value" class="slider-value">4.0</span>
+                                </div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>Bright</span>
+                                <span>Dim</span>
+                            </div>
+                        </div>
 
-            <!-- ZOOM CONTROLS -->
-            <div class="zoom-controls">
-                <button class="zoom-button" id="zoom-in">+</button>
-                <button class="zoom-button" id="zoom-out">−</button>
-                <button class="zoom-button" id="zoom-reset">⌂</button>
+                        <div class="filter-control">
+                            <label>Distance (Light Years)</label>
+                            <div class="dual-slider-container">
+                                <div class="dual-slider">
+                                    <input type="range" id="distance-min" min="1" max="3000" value="1" step="1">
+                                    <input type="range" id="distance-max" min="1" max="3000" value="3000" step="1">
+                                </div>
+                                <div class="dual-slider-values">
+                                    <span id="distance-min-value" class="slider-value">1</span>
+                                    <span class="slider-separator">to</span>
+                                    <span id="distance-max-value" class="slider-value">1000</span>
+                                    <span class="slider-unit">ly</span>
+                                </div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>Near</span>
+                                <span>Far</span>
+                            </div>
+                        </div>
+
+                        <div class="filter-control">
+                            <label>Age (Billion Years)</label>
+                            <div class="dual-slider-container">
+                                <div class="dual-slider">
+                                    <input type="range" id="age-min" min="0" max="8" value="0" step="0.1">
+                                    <input type="range" id="age-max" min="0" max="8" value="8" step="0.1">
+                                </div>
+                                <div class="dual-slider-values">
+                                    <span id="age-min-value" class="slider-value">0.0</span>
+                                    <span class="slider-separator">to</span>
+                                    <span id="age-max-value" class="slider-value">10.0</span>
+                                    <span class="slider-unit">Gy</span>
+                                </div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>Young</span>
+                                <span>Old</span>
+                            </div>
+                        </div>
+
+                        <div class="filter-control">
+                            <label>Mass (Solar Masses)</label>
+                            <div class="dual-slider-container">
+                                <div class="dual-slider">
+                                    <input type="range" id="mass-min" min="0.5" max="35" value="0.5" step="0.1">
+                                    <input type="range" id="mass-max" min="0.5" max="35" value="35" step="0.1">
+
+                                </div>
+                                <div class="dual-slider-values">
+                                    <span id="mass-min-value" class="slider-value">0.1</span>
+                                    <span class="slider-separator">to</span>
+                                    <span id="mass-max-value" class="slider-value">25.0</span>
+                                    <span class="slider-unit">M☉</span>
+                                </div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>Light</span>
+                                <span>Heavy</span>
+                            </div>
+                        </div>
+
+                        <div class="filter-control">
+                            <label>Luminosity (Solar Luminosities)</label>
+                            <div class="dual-slider-container">
+                                <div class="dual-slider">
+                                    <input type="range" id="luminosity-min" min="0.1" max="1000000" value="0.1"
+                                        step="0.1">
+                                    <input type="range" id="luminosity-max" min="0.1" max="1000000" value="1000000"
+                                        step="0.1">
+                                </div>
+                                <div class="dual-slider-values">
+                                    <span id="luminosity-min-value" class="slider-value">0.1</span>
+                                    <span class="slider-separator">to</span>
+                                    <span id="luminosity-max-value" class="slider-value">100k</span>
+                                    <span class="slider-unit">L☉</span>
+                                </div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>Dim</span>
+                                <span>Bright</span>
+                            </div>
+                        </div>
+
+                        <div class="filter-control">
+                            <label>Temperature (Kelvin)</label>
+                            <div class="dual-slider-container">
+                                <div class="dual-slider">
+                                    <input type="range" id="temperature-min" min="3000" max="45000" value="3000"
+                                        step="100">
+                                    <input type="range" id="temperature-max" min="3000" max="45000" value="45000"
+                                        step="100">
+                                </div>
+                                <div class="dual-slider-values">
+                                    <span id="temperature-min-value" class="slider-value">3k</span>
+                                    <span class="slider-separator">to</span>
+                                    <span id="temperature-max-value" class="slider-value">30k</span>
+                                    <span class="slider-unit">K</span>
+                                </div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>Cool</span>
+                                <span>Hot</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button id="reset-filters" class="btn btn-secondary">Reset Filters</button>
+                        <div class="stars-count">
+                            Showing <span id="visible-count">0</span> of <span id="total-count">0</span> stars
+                        </div>
+                    </div>
+                </div>
+
+                <!-- I location-section, efter location-info div, lägg till: -->
+
+                <div class="location-section">
+                    <h3>Location</h3>
+                    <button id="get-location" class="btn btn-primary">📍 Use My Location</button>
+
+                    <div id="location-info" class="location-info hidden">
+                        <p>Latitude: <span id="user-lat">--</span>°</p>
+                        <p>Longitude: <span id="user-lon">--</span>°</p>
+                    </div>
+
+                    <!-- ✅ LÄGG TILL DENNA KNAPP -->
+                    <button id="show-info" class="btn btn-secondary" style="margin-top: 15px;">ℹ️ About &
+                        Contact</button>
+                </div>
             </div>
 
-            <div class="zoom-info" id="zoom-info">Zoom: 100%</div>
-
-            <div id="star-info" class="hidden">
-                <h3 id="star-name">Star Name</h3>
-                <p id="star-details"></p>
-                <button id="close-info">×</button>
+            <div class="star-map-container">
+                <div class="map-controls">
+                    <div class="zoom-controls">
+                        <button id="zoom-in" class="btn btn-icon">+</button>
+                        <button id="zoom-out" class="btn btn-icon">-</button>
+                        <button id="zoom-reset" class="btn btn-icon">⌂</button>
+                    </div>
+                </div>
+                <canvas id="star-map" width="800" height="600"></canvas>
             </div>
         </main>
 
-        <section class="filters-section">
-            <!-- Location Controls -->
-            <div class="control-section">
-                <h3>Location</h3>
-                <div class="controls">
-                    <button id="get-location">Get My Location</button>
-                    <span id="coordinates">Location: Not detected</span>
-                    <button id="open-modal">About & Contact</button>
+        <div id="star-info" class="star-info-modal hidden">
+            <div class="star-info-content">
+                <button id="close-info" class="close-btn">&times;</button>
+                <h3 id="star-name">Star Name</h3>
+                <div id="star-details" class="star-details">
+                    <!-- Star details will be populated here -->
                 </div>
             </div>
-
-            <!-- Filter Controls -->
-            <div class="control-section">
-                <h3>Star Filters</h3>
-                <div class="filter-grid">
-                    <div class="filter-control">
-                        <label>Brightness (Magnitude)</label>
-                        <div class="dual-slider-container">
-                            <div class="dual-slider">
-                                <input type="range" id="magnitude-min" min="-2" max="6" value="-2" step="0.1">
-                                <input type="range" id="magnitude-max" min="-2" max="6" value="6" step="0.1">
-                            </div>
-                            <div class="dual-slider-values">
-                                <span id="magnitude-min-value" class="slider-value">-2.0</span>
-                                <span class="slider-separator">to</span>
-                                <span id="magnitude-max-value" class="slider-value">4.0</span>
-                            </div>
-                        </div>
-                        <div class="slider-labels">
-                            <span>Very Bright</span>
-                            <span>Dim</span>
-                        </div>
-                    </div>
-
-                    <div class="filter-control">
-                        <label>Distance (Light Years)</label>
-                        <div class="dual-slider-container">
-                            <div class="dual-slider">
-                                <input type="range" id="distance-min" min="1" max="3000" value="1" step="10">
-                                <input type="range" id="distance-max" min="1" max="3000" value="3000" step="10">
-                            </div>
-                            <div class="dual-slider-values">
-                                <span id="distance-min-value" class="slider-value">1</span>
-                                <span class="slider-separator">to</span>
-                                <span id="distance-max-value" class="slider-value">1000</span>
-                                <span class="slider-unit">ly</span>
-                            </div>
-                        </div>
-                        <div class="slider-labels">
-                            <span>Close</span>
-                            <span>Far</span>
-                        </div>
-                    </div>
-
-                    <div class="filter-control">
-                        <label>Age (Billion Years)</label>
-                        <div class="dual-slider-container">
-                            <div class="dual-slider">
-                                <input type="range" id="age-min" min="0" max="15" value="0" step="0.1">
-                                <input type="range" id="age-max" min="0" max="15" value="15" step="0.1">
-                            </div>
-                            <div class="dual-slider-values">
-                                <span id="age-min-value" class="slider-value">0.0</span>
-                                <span class="slider-separator">to</span>
-                                <span id="age-max-value" class="slider-value">10.0</span>
-                                <span class="slider-unit">Gy</span>
-                            </div>
-                        </div>
-                        <div class="slider-labels">
-                            <span>Young</span>
-                            <span>Old</span>
-                        </div>
-                    </div>
-
-                    <div class="filter-control">
-                        <label>Mass (Solar Masses)</label>
-                        <div class="dual-slider-container">
-                            <div class="dual-slider">
-                                <input type="range" id="mass-min" min="0.1" max="50" value="0.1" step="0.1">
-                                <input type="range" id="mass-max" min="0.1" max="50" value="50" step="0.1">
-                            </div>
-                            <div class="dual-slider-values">
-                                <span id="mass-min-value" class="slider-value">0.1</span>
-                                <span class="slider-separator">to</span>
-                                <span id="mass-max-value" class="slider-value">25.0</span>
-                                <span class="slider-unit">M☉</span>
-                            </div>
-                        </div>
-                        <div class="slider-labels">
-                            <span>Light</span>
-                            <span>Heavy</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Filter Summary -->
-                <div class="filter-summary">
-                    <span id="visible-count">Showing all stars</span>
-                    <button id="reset-filters">Reset All Filters</button>
-                </div>
-            </div>
-        </section>
+        </div>
     </div>
-
     <!-- Modal Dialog -->
     <dialog class="modal" id="modal">
         <button class="button close-button" id="close-modal">×</button>
@@ -178,9 +220,7 @@
             </form>
         </div>
     </dialog>
-
     <script src="js/stardata.js"></script>
-    <script src="js/geolocation.js"></script>
     <script src="js/starmap.js"></script>
     <script src="js/app.js"></script>
 </body>
