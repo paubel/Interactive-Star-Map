@@ -15,8 +15,73 @@
             <p>by Paul Belfrage v0.95</p>
         </header>
 
+        <button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-label="Toggle filters menu">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+        </button>
+
+        <div id="mobile-overlay" class="mobile-overlay"></div>
+
         <main class="main-content">
-            <div class="controls-panel">
+            <button id="toggle-left-panel" class="panel-toggle left-toggle" aria-label="Toggle left panel">
+                <span class="toggle-icon">◀</span>
+            </button>
+
+            <div class="left-panel">
+                <div class="location-section">
+                    <h3>Location</h3>
+                    <button id="get-location" class="btn btn-primary">📍 Use My Location</button>
+
+                    <div id="location-info" class="location-info hidden">
+                        <p>Latitude: <span id="user-lat">--</span>°</p>
+                        <p>Longitude: <span id="user-lon">--</span>°</p>
+                    </div>
+                </div>
+
+                <div class="datetime-section">
+                    <h3>Date & Time</h3>
+                    <div class="datetime-controls">
+                        <div class="datetime-input-group">
+                            <label for="date-input">Date</label>
+                            <input type="date" id="date-input" class="datetime-input">
+                        </div>
+                        <div class="datetime-input-group">
+                            <label for="time-input">Time</label>
+                            <input type="time" id="time-input" class="datetime-input">
+                        </div>
+                    </div>
+                    <div class="datetime-actions">
+                        <button id="apply-datetime" class="btn btn-primary">Apply</button>
+                        <button id="reset-datetime" class="btn btn-secondary">Reset to Now</button>
+                    </div>
+                    <div id="current-datetime" class="datetime-display hidden">
+                        <p>Showing sky for:</p>
+                        <p id="datetime-text">--</p>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <button id="show-info" class="btn btn-secondary">ℹ️ About & Contact</button>
+                </div>
+            </div>
+
+            <div class="star-map-container">
+                <div class="map-controls">
+                    <div class="zoom-controls">
+                        <button id="zoom-in" class="btn btn-icon">+</button>
+                        <button id="zoom-out" class="btn btn-icon">-</button>
+                        <button id="zoom-reset" class="btn btn-icon">⌂</button>
+                    </div>
+                </div>
+                <canvas id="star-map" width="800" height="600"></canvas>
+            </div>
+
+            <button id="toggle-right-panel" class="panel-toggle right-toggle" aria-label="Toggle filters panel">
+                <span class="toggle-icon">▶</span>
+            </button>
+
+            <div class="filters-panel">
                 <div class="filter-section">
                     <h3>Filters</h3>
                     <div class="filter-grid">
@@ -152,33 +217,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- I location-section, efter location-info div, lägg till: -->
-
-                <div class="location-section">
-                    <h3>Location</h3>
-                    <button id="get-location" class="btn btn-primary">📍 Use My Location</button>
-
-                    <div id="location-info" class="location-info hidden">
-                        <p>Latitude: <span id="user-lat">--</span>°</p>
-                        <p>Longitude: <span id="user-lon">--</span>°</p>
-                    </div>
-
-                    <!-- ✅ LÄGG TILL DENNA KNAPP -->
-                    <button id="show-info" class="btn btn-secondary" style="margin-top: 15px;">ℹ️ About &
-                        Contact</button>
-                </div>
-            </div>
-
-            <div class="star-map-container">
-                <div class="map-controls">
-                    <div class="zoom-controls">
-                        <button id="zoom-in" class="btn btn-icon">+</button>
-                        <button id="zoom-out" class="btn btn-icon">-</button>
-                        <button id="zoom-reset" class="btn btn-icon">⌂</button>
-                    </div>
-                </div>
-                <canvas id="star-map" width="800" height="600"></canvas>
             </div>
         </main>
 

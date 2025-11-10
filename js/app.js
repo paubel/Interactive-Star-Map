@@ -72,6 +72,130 @@ class StarMapApp {
     document.getElementById("zoom-reset").addEventListener("click", () => {
       this.starMap.resetZoom();
     });
+
+    // Date/Time controls
+    document.getElementById("apply-datetime").addEventListener("click", () => {
+      this.applyDateTime();
+    });
+
+    document.getElementById("reset-datetime").addEventListener("click", () => {
+      this.resetDateTime();
+    });
+
+    // Initialize date/time inputs to current date/time
+    this.initializeDateTimeInputs();
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+    const mobileOverlay = document.getElementById("mobile-overlay");
+
+    if (mobileMenuToggle && mobileOverlay) {
+      mobileMenuToggle.addEventListener("click", () => {
+        this.toggleMobileMenu();
+      });
+
+      mobileOverlay.addEventListener("click", () => {
+        this.closeMobileMenu();
+      });
+    }
+
+    // Desktop panel toggles
+    const leftToggle = document.getElementById("toggle-left-panel");
+    const rightToggle = document.getElementById("toggle-right-panel");
+
+    if (leftToggle) {
+      leftToggle.addEventListener("click", () => {
+        this.toggleLeftPanel();
+      });
+    }
+
+    if (rightToggle) {
+      rightToggle.addEventListener("click", () => {
+        this.toggleRightPanel();
+      });
+    }
+  }
+
+  toggleLeftPanel() {
+    const mainContent = document.querySelector(".main-content");
+    const wasCollapsed = mainContent.classList.contains("left-collapsed");
+    const bothWereCollapsed = mainContent.classList.contains("both-collapsed");
+
+    if (bothWereCollapsed) {
+      mainContent.classList.remove("both-collapsed");
+      mainContent.classList.add("right-collapsed");
+    } else {
+      mainContent.classList.toggle("left-collapsed");
+    }
+
+    // Update both-collapsed state
+    if (
+      mainContent.classList.contains("left-collapsed") &&
+      mainContent.classList.contains("right-collapsed")
+    ) {
+      mainContent.classList.remove("left-collapsed", "right-collapsed");
+      mainContent.classList.add("both-collapsed");
+    }
+
+    // Trigger canvas resize after animation completes
+    setTimeout(() => {
+      this.starMap.resizeCanvas();
+    }, 350);
+  }
+
+  toggleRightPanel() {
+    const mainContent = document.querySelector(".main-content");
+    const wasCollapsed = mainContent.classList.contains("right-collapsed");
+    const bothWereCollapsed = mainContent.classList.contains("both-collapsed");
+
+    if (bothWereCollapsed) {
+      mainContent.classList.remove("both-collapsed");
+      mainContent.classList.add("left-collapsed");
+    } else {
+      mainContent.classList.toggle("right-collapsed");
+    }
+
+    // Update both-collapsed state
+    if (
+      mainContent.classList.contains("left-collapsed") &&
+      mainContent.classList.contains("right-collapsed")
+    ) {
+      mainContent.classList.remove("left-collapsed", "right-collapsed");
+      mainContent.classList.add("both-collapsed");
+    }
+
+    // Trigger canvas resize after animation completes
+    setTimeout(() => {
+      this.starMap.resizeCanvas();
+    }, 350);
+  }
+
+  toggleMobileMenu() {
+    const filtersPanel = document.querySelector(".filters-panel");
+    const menuToggle = document.getElementById("mobile-menu-toggle");
+    const overlay = document.getElementById("mobile-overlay");
+
+    filtersPanel.classList.toggle("mobile-open");
+    menuToggle.classList.toggle("active");
+
+    if (filtersPanel.classList.contains("mobile-open")) {
+      overlay.style.display = "block";
+      setTimeout(() => overlay.classList.add("active"), 10);
+    } else {
+      overlay.classList.remove("active");
+      setTimeout(() => (overlay.style.display = "none"), 300);
+    }
+  }
+
+  closeMobileMenu() {
+    const filtersPanel = document.querySelector(".filters-panel");
+    const menuToggle = document.getElementById("mobile-menu-toggle");
+    const overlay = document.getElementById("mobile-overlay");
+
+    filtersPanel.classList.remove("mobile-open");
+    menuToggle.classList.remove("active");
+    overlay.classList.remove("active");
+    setTimeout(() => (overlay.style.display = "none"), 300);
   }
 
   // ✅ LÄGG TILL DESSA METODER LÄNGST NER I KLASSEN (efter hideStarInfo)
@@ -344,6 +468,63 @@ class StarMapApp {
 
   hideStarInfo() {
     document.getElementById("star-info").classList.add("hidden");
+  }
+
+  initializeDateTimeInputs() {
+    const now = new Date();
+    const dateInput = document.getElementById("date-input");
+    const timeInput = document.getElementById("time-input");
+
+    // Format date as YYYY-MM-DD
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    dateInput.value = `${year}-${month}-${day}`;
+
+    // Format time as HH:MM
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    timeInput.value = `${hours}:${minutes}`;
+  }
+
+  applyDateTime() {
+    const dateInput = document.getElementById("date-input").value;
+    const timeInput = document.getElementById("time-input").value;
+
+    if (!dateInput || !timeInput) {
+      alert("Please select both date and time");
+      return;
+    }
+
+    // Combine date and time
+    const dateTimeString = `${dateInput}T${timeInput}`;
+    const selectedDate = new Date(dateTimeString);
+
+    if (isNaN(selectedDate.getTime())) {
+      alert("Invalid date or time");
+      return;
+    }
+
+    // Update star map
+    this.starMap.setDateTime(selectedDate);
+
+    // Show current datetime
+    const display = document.getElementById("current-datetime");
+    const text = document.getElementById("datetime-text");
+    text.textContent = selectedDate.toLocaleString("sv-SE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    display.classList.remove("hidden");
+  }
+
+  resetDateTime() {
+    this.starMap.resetDateTime();
+    this.initializeDateTimeInputs();
+    document.getElementById("current-datetime").classList.add("hidden");
   }
 }
 

@@ -16,6 +16,9 @@ class StarMap {
     this.userLat = 59.334; // Stockholm som default
     this.userLon = 18.063;
 
+    // Current date/time for sky calculation (default to now)
+    this.currentDate = new Date();
+
     // Initialize range filters
     // ✅ OPTIMIZED range filters based on actual data
     this.magnitudeRange = { min: -2.0, max: 4.0 }; // -1.46 to 3.58 + buffer
@@ -91,17 +94,20 @@ class StarMap {
   handleWheel(e) {
     e.preventDefault();
 
-    const rect = this.canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+    // Långsammare zoom-faktor för bättre kontroll
+    const zoomFactor = e.deltaY > 0 ? 0.95 : 1.05;
     const newScale = Math.max(0.1, Math.min(5, this.scale * zoomFactor));
 
     if (newScale !== this.scale) {
-      // Zoom towards mouse position
-      this.offsetX = mouseX - (mouseX - this.offsetX) * (newScale / this.scale);
-      this.offsetY = mouseY - (mouseY - this.offsetY) * (newScale / this.scale);
+      // Zooma från centrum av kartan
+      const centerX = this.canvas.width / 2;
+      const centerY = this.canvas.height / 2;
+
+      // Beräkna hur mycket centrum ska flytta sig
+      const scaleRatio = newScale / this.scale;
+      this.offsetX = centerX - (centerX - this.offsetX) * scaleRatio;
+      this.offsetY = centerY - (centerY - this.offsetY) * scaleRatio;
+
       this.scale = newScale;
       this.render();
     }
@@ -162,8 +168,7 @@ class StarMap {
       return { altitude, azimuth };
     }
 
-    const now = new Date();
-    const julianDay = this.getJulianDay(now);
+    const julianDay = this.getJulianDay(this.currentDate);
     const lst = this.getLocalSiderealTime(julianDay, this.userLon);
 
     // ✅ VIKTIGT: Konvertera RA från grader till timmar
@@ -331,6 +336,16 @@ class StarMap {
   setUserLocation(lat, lon) {
     this.userLat = lat;
     this.userLon = lon;
+    this.render();
+  }
+
+  setDateTime(date) {
+    this.currentDate = date;
+    this.render();
+  }
+
+  resetDateTime() {
+    this.currentDate = new Date();
     this.render();
   }
 

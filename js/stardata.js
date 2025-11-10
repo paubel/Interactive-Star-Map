@@ -1228,7 +1228,7 @@ const STARS = [
   },
   {
     name: "Saiph",
-    ra: 78.265,
+    ra: 86.939,
     dec: -9.67,
     magnitude: 2.09,
     constellation: "Orion",
